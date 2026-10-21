@@ -3,7 +3,7 @@ const Note = require("../models/Note.js")
 
 async function notesRead (req,res) {
     try {
-        const note = await Note.find()
+        const note = await Note.find().sort({createdAt:-1})
         res.status(200).json(note)
     } catch (error) {
         console.error("Error in getAllnotes controller",error);
@@ -51,4 +51,18 @@ async function notesDelete (req,res) {
     }
 };
 
-module.exports = { notesRead, notesCreate, notesUpdate, notesDelete };
+async function notesPatched (req,res) {
+    try {
+        const { title,content } = req.body
+        const patchedNote = await Note.findById(req.params.id, {title,content}, {new: true});
+        if (!patchedNote) {
+            return res.status(404).json({message:'Note not found'});
+        }
+        res.status(200).json(patchedNote);
+    } catch (error) {
+        console.error("Error in notesPatched controller",error);
+        res.status(500).json({message:'Internal server error'});
+    }
+};
+
+module.exports = { notesRead, notesCreate, notesUpdate, notesDelete, notesPatched };
